@@ -1,0 +1,4 @@
+run make client and make server to get the executables.
+
+the client exe needs an argument: the client message queue name.
+!!! Make sure it's first char is '/'.
