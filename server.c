@@ -44,6 +44,9 @@ int main(void) {
         //open client's message queue
         c_queue = mq_open(buf, O_CREAT | O_RDWR, 0666, NULL);
         if (c_queue == (mqd_t)-1) {
+            //too many open files we must close the server too
+            mq_close(s_queue);
+            mq_unlink(server_name);
             perror("client queue");
             exit(1);
         }
