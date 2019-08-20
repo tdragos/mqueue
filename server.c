@@ -58,6 +58,13 @@ int main(void) {
             perror("mq_send");
             exit(1);
         }
+
+        //close the fd for the client queue
+        status = mq_close(c_queue);
+        if (status == -1) {
+            perror("close client");
+            exit(1);
+        }
     }
 
     //close and unlink
