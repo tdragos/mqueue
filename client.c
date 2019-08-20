@@ -4,6 +4,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <mqueue.h>
+#include <unistd.h>
+#include <time.h>
 
 #define BUF_SIZE 8192
 
@@ -14,6 +16,7 @@ int main(int argc, char **argv) {
     mqd_t c_queue;
     int prio = 1;
     char buf[BUF_SIZE];
+    struct timespec timeout;
     const char server_name[] = "/server_queue";
 
     //arg[1] must be the client's message queue name
@@ -33,7 +36,7 @@ int main(int argc, char **argv) {
 
     //send client's name to the server
     status = mq_send(s_queue, client_name, strlen(client_name), prio);
-    if (status == -1) {
+    if (status < 0) {
         perror("send_name");
         exit(1);
     }
@@ -49,9 +52,16 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    //wait for the server's answer
-    status = mq_receive(c_queue, buf, BUF_SIZE, &prio);
+    //wait for the server's answer: timeout = 1 second
+    clock_gettime(CLOCK_REALTIME, &timeout);
+    timeout.tv_sec += 1;
+    status = mq_timedreceive(c_queue, buf, BUF_SIZE, &prio, &timeout);
     if (status == -1) {
+        //server probably down, we close the queues
+        mq_close(c_queue);
+        mq_unlink(client_name);
+        mq_close(s_queue);
+        mq_unlink(server_name);
         perror("receive");
         exit(1);
     }

@@ -1,8 +1,8 @@
 client: client.c
-	gcc client.c -o client -lrt
+	gcc -g client.c -o client -lrt
 
 server: server.c
-	gcc server.c -o server -lrt
+	gcc -g server.c -o server -lrt
 
 clean:
 	rm server client
